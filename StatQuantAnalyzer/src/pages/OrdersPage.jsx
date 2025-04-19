@@ -17,19 +17,27 @@ const OrdersPage = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('https://localhost:7188/open');
+  
+      const token = localStorage.getItem('token'); // pega o token do localStorage
+  
+      const response = await axios.get('https://localhost:7188/open', {
+        headers: {
+          Authorization: `Bearer ${token}`, // envia o token no cabeçalho
+        },
+      });
+  
       const fetchedOrders = response.data;
       console.log('Dados recebidos da API:', fetchedOrders);
-
+  
       const newTickets = fetchedOrders
         .map(o => o.ticket)
         .filter(ticket => !previousTickets.current.has(ticket));
-
+  
       setHighlightedTickets(newTickets);
       setOrders(fetchedOrders);
       setLastUpdate(new Date());
       previousTickets.current = new Set(fetchedOrders.map(o => o.ticket));
-
+  
       setTimeout(() => setHighlightedTickets([]), 4000);
     } catch (error) {
       console.error('Erro ao buscar ordens:', error);
@@ -37,6 +45,7 @@ const OrdersPage = () => {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchOrders();
